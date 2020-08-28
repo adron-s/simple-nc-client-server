@@ -16,11 +16,12 @@ fw_file="${2}"
 }
 
 str=$(echo "${fraza}" | nc ${host} ${port} -q 1 2>/dev/null)
-[ "${str}" = "${fraza}" ] && {
+if [ "${str}" = "${fraza}" ]; then
 	sleep 1
 	cat ${fw_file} | nc ${host} ${port} -q 1 2>/dev/null && echo "FW NC Done"
 	sleep 1
 	loc_md5s=$(md5sum ${fw_file} | sed 's/ .*//')
+	sleep 1
 	rem_md5s=$(echo "${loc_md5s}" | nc ${host} ${port} -q 1 2>/dev/null)
 	if [ "${rem_md5s}" = "${loc_md5s}" ]; then
 			echo "MD5 sum check is OK"
@@ -30,4 +31,6 @@ str=$(echo "${fraza}" | nc ${host} ${port} -q 1 2>/dev/null)
 			echo "${rem_md5s}"
 			echo "${loc_md5s}"
 		fi
-}
+else
+	echo "Can't connect to ${host} ${port}"
+fi
